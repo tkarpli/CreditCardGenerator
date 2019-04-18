@@ -14,6 +14,39 @@ namespace CreditCardGenerator
             return str.Replace(" ", "");
         }
 
+        static private bool FormatValidate(string cardNumber)
+        {
+            bool isFormatValid = Regex.IsMatch(cardNumber, @"^(?:((\d{4} ){2,3}\d{1,4})|((\d{4} ){4}\d{1,3})|(\d{12,19}))$");
+            return isFormatValid;
+        }
+
+        static private int CalculateChecksum(string cardNumberWithoutLastDig)
+        {
+            cardNumberWithoutLastDig = DeleteAllWhitespaces(cardNumberWithoutLastDig);
+            int sum = 0;
+            int n;
+            bool alternate = true;
+            char[] nx = cardNumberWithoutLastDig.ToArray();
+            for (int i = cardNumberWithoutLastDig.Length - 1; i >= 0; i--)
+            {
+                n = int.Parse(nx[i].ToString());
+
+                if (alternate)
+                {
+                    n *= 2;
+
+                    if (n > 9)
+                    {
+                        n -= 9;
+                    }
+                }
+                sum += n;
+                alternate = !alternate;
+            }
+            int checksum = (10 - sum % 10)%10;
+            return checksum;
+        }
+
         static public string GetCreditCardVendor(string cardNumber)
         {
             //American Express: IIN 34,37; Length 15
@@ -45,47 +78,40 @@ namespace CreditCardGenerator
 
         static public bool IsCreditCardNumberValid(string cardNumber)
         {
-            bool isFormatValid = Regex.IsMatch(cardNumber, @"^(?:((\d{4} ){2,3}\d{1,4})|((\d{4} ){4}\d{1,3})|(\d{12,19}))$");
+            bool isFormatValid = FormatValidate(cardNumber);
             if (!isFormatValid)
                 return false;
             cardNumber = DeleteAllWhitespaces(cardNumber);
+            string cardNumberWithoutLastDig = cardNumber.Substring(0,cardNumber.Length - 1);
+            int lastDigInt = Convert.ToInt32(cardNumber.Substring(cardNumber.Length - 1, 1));
             #region Luhn algorithm
-            int sum = 0;
-            int n;
-            bool alternate = false;
-            char[] nx = cardNumber.ToArray();
-            for (int i = cardNumber.Length - 1; i >= 0; i--)
-            {
-                n = int.Parse(nx[i].ToString());
-
-                if (alternate)
-                {
-                    n *= 2;
-
-                    if (n > 9)
-                    {
-                        n = (n % 10) + 1;
-                    }
-                }
-                sum += n;
-                alternate = !alternate;
-            }
-            return sum % 10 == 0;
+            if (CalculateChecksum(cardNumberWithoutLastDig) == lastDigInt)
+                return true;
+            else
+                return false;
             #endregion
         }
+
+        //TODO: Resolve conflicts between string and int; Convert somewhere Int to String or another way;
 
         static public string GenerateNextCreditCardNumber(string cardNumber)
         {
             cardNumber = DeleteAllWhitespaces(cardNumber);
-            long cardNumberInt = Convert.ToInt64(cardNumber);
+            ulong cardNumberInt = Convert.ToUInt64(cardNumber);
+            ulong nextCardNumber = cardNumberInt;
+            ulong nextCardNumberIntWithoutLastDig = Convert.ToUInt64(cardNumber.Substring(0, cardNumber.Length - 1));
             string cardVendor = GetCreditCardVendor(cardNumber);
             do
             {
-                cardNumberInt++;
-                if (IsCreditCardNumberValid(cardNumberInt.ToString()) && GetCreditCardVendor(cardNumberInt.ToString()) == cardVendor)
-                    return cardNumberInt.ToString();
+                if (IsCreditCardNumberValid(nextCardNumber.ToString()))
+                    nextCardNumberIntWithoutLastDig++;
+                int nextCardLastDig = CalculateChecksum(nextCardNumberIntWithoutLastDig.ToString());
+                nextCardNumber = Convert.ToUInt64(nextCardNumberIntWithoutLastDig.ToString() + nextCardLastDig.ToString());
+
+                if (IsCreditCardNumberValid(nextCardNumber.ToString()) && GetCreditCardVendor(nextCardNumber.ToString()) == cardVendor)
+                    return nextCardNumber.ToString();
             }
-            while (cardNumberInt.ToString().Length == cardNumber.Length);
+            while (GetCreditCardVendor(nextCardNumber.ToString()) == cardVendor);
 
             return null;
         }

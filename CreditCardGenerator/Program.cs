@@ -20,7 +20,7 @@ namespace CreditCardGenerator
                 Console.WriteLine($"Your card number: {cardNumber}");
                 Console.WriteLine($"Vendor of your card: {vendor}");
                 Console.WriteLine($"Is your card valid? {isValid}");
-                if (isValid)
+                if ( vendor != "Unknown" )
                 {
                     string nextCardNumber = CreditCard.GenerateNextCreditCardNumber(cardNumber);
                     if (nextCardNumber != null)
