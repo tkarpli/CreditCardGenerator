@@ -16,17 +16,20 @@ namespace CreditCardGenerator
                 Console.Write("Card Number: ");
                 string cardNumber = Console.ReadLine();
                 bool isValid = CreditCard.IsCreditCardNumberValid(cardNumber);
-                string vendor = CreditCard.GetCreditCardVendor(cardNumber);
                 Console.WriteLine($"Your card number: {cardNumber}");
-                Console.WriteLine($"Vendor of your card: {vendor}");
                 Console.WriteLine($"Is your card valid? {isValid}");
-                if ( vendor != "Unknown" )
+                if ( isValid )
                 {
-                    string nextCardNumber = CreditCard.GenerateNextCreditCardNumber(cardNumber);
-                    if (nextCardNumber != null)
-                        Console.WriteLine($"Next card number: {nextCardNumber}");
-                    else
-                        Console.WriteLine($"Can't generate a new card");
+                    string vendor = CreditCard.GetCreditCardVendor(cardNumber);
+                    Console.WriteLine($"Vendor of your card: {vendor}");
+                    if (vendor != "Unknown")
+                    {
+                        string nextCardNumber = CreditCard.GenerateNextCreditCardNumber(cardNumber);
+                        if (nextCardNumber != null)
+                            Console.WriteLine($"Next card number: {nextCardNumber}");
+                        else
+                            Console.WriteLine($"Can't generate a new card");
+                    }
                 }
                 Console.WriteLine("-----------------");
             }
