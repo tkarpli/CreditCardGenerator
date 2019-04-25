@@ -44,8 +44,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CreditCard.cs" />
+    <Compile Include="Helper.cs" />
+    <Compile Include="Luhn.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="VendorName.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
