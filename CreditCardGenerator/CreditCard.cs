@@ -160,6 +160,8 @@ namespace CreditCardGenerator
             return Luhn.Validate(cardNumber);
         }
 
+
+
         static public string GenerateNextCreditCardNumber(string cardNumber)
         {
             if (!IsCreditCardNumberValid(cardNumber))
@@ -186,6 +188,7 @@ namespace CreditCardGenerator
                         continue;
                     }
 
+                    //Default IIN is Unknown
                     var defaultIIN = vendorInfo.IINs.SingleOrDefault(e =>
                         Helper.FormatIINTo6Digs(cardIIN) >= Helper.FormatIINTo6Digs(e.minIIN) &&
                         Helper.FormatIINTo6Digs(cardIIN) <= Helper.FormatIINTo6Digs(e.maxIIN)
@@ -204,8 +207,7 @@ namespace CreditCardGenerator
                             cardNumber = curIINStr + new string('0', i - curIINLength);
                             curClientID = cardNumber.Substring(curIINLength, i - curIINLength - 1);
                         }
-
-                        if (IsCreditCardNumberValid(cardNumber))
+                        else
                         {
                             string newClientID = (Convert.ToUInt64(curClientID) + 1).ToString();
                             if (newClientID.Length > curClientID.Length)
@@ -219,9 +221,8 @@ namespace CreditCardGenerator
                             }
                         }
 
-                        string nextCardWithoutLastDig = curIINStr + curClientID;
-                        int nextCardLastDig = Luhn.CalculateChecksum(nextCardWithoutLastDig);
-                        string nextCardNumber = nextCardWithoutLastDig + nextCardLastDig.ToString();
+                        int nextCardLastDig = Luhn.CalculateChecksum(curIINStr + curClientID);
+                        string nextCardNumber = curIINStr + curClientID + nextCardLastDig.ToString();
 
                         return nextCardNumber;
                     }
