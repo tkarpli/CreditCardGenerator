@@ -187,8 +187,7 @@ namespace CreditCardGenerator
                     {
                         continue;
                     }
-
-                    //Default IIN is Unknown
+                   
                     var defaultIIN = vendorInfo.IINs.SingleOrDefault(e =>
                         Helper.FormatIINTo6Digs(cardIIN) >= Helper.FormatIINTo6Digs(e.minIIN) &&
                         Helper.FormatIINTo6Digs(cardIIN) <= Helper.FormatIINTo6Digs(e.maxIIN)
